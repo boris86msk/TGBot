@@ -25,10 +25,10 @@ public class WeatherRestTemplate {
         String res = "Нашел информацию по запросу: %s\n" +
                 "текущая дата/время: %s\n" +
                 Icon.TEMP.get() + " температура:  %s°C\n" +
-                "давление:  %fмм рт.ст.\n" +
+                "    давление:  %fмм рт.ст.\n" +
                 Icon.CLOUD.get() + " облачность: %s%%\n" +
-                Icon.RAIN.get() + " осадки: %smm\n" +
-                Icon.WIND.get() + " скоростьветра: %fм/с";
+                "    осадки: %smm\n" +
+                "    скорость ветра: %fм/с";
         String format = String.format(res, responseDto.getLocation().getName(),
                 responseDto.getLocation().getLocaltime(),
                 responseDto.getCurrent().getTemp_c(),
