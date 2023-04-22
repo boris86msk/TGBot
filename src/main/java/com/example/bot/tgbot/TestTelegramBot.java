@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -162,14 +163,24 @@ public class TestTelegramBot extends TelegramLongPollingBot {
     }
 
     private void sendWeatherInCity(String param, long chatId) {
-        ResponseDto weatherInfo = weatherRestTemplate.getWeatherInfo(param);
-        String str = weatherRestTemplate.transformResponseDto(weatherInfo);
+        ResponseDto weatherInfo = null;
+        String str = "сервис недоступен";
+        try {
+            weatherInfo = weatherRestTemplate.getWeatherInfo(param);
+        } catch (ResourceAccessException e) {
+            log.error(e.getMessage());
+        }
+
+        if(weatherInfo != null) {
+            str = weatherRestTemplate.transformResponseDto(weatherInfo);
+        }
+
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(str);
         try {
             execute(message);
-            log.info("anybody sed weather");
+            log.info("id:" + chatId + " asked for the weather in " + param);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
@@ -187,10 +198,6 @@ public class TestTelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void searchUsers() {
-
     }
 
 }
