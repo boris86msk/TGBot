@@ -27,8 +27,8 @@ public class WeatherRestTemplate {
                 Icon.TEMP.get() + " температура:  %s°C\n" +
                 "давление:  %fмм рт.ст.\n" +
                 Icon.CLOUD.get() + " облачность: %s%%\n" +
-                Icon.RAIN.get() + " осадки: %smm\n" +
-                Icon.WIND.get() + " скоростьветра: %fм/с";
+                " осадки: %smm\n" +
+                " скоростьветра: %fм/с";
         String format = String.format(res, responseDto.getLocation().getName(),
                 responseDto.getLocation().getLocaltime(),
                 responseDto.getCurrent().getTemp_c(),

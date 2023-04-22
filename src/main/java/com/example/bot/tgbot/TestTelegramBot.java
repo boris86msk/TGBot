@@ -11,10 +11,13 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import static com.example.bot.tgbot.components.BotCommands.*;
@@ -86,6 +89,17 @@ public class TestTelegramBot extends TelegramLongPollingBot {
             sendHelpText(chatId, HELP_TEXT);
         } else if (receivedMessage.equals("/info")) {
             sendInfoText(chatId, INFO_TEXT);
+        } else if (receivedMessage.equals("/java")) {
+            SendPhoto sendPhoto = new SendPhoto();
+            sendPhoto.setChatId(chatId);
+            sendPhoto.setPhoto(new InputFile(new File("C:\\projects\\tgBot\\src\\main\\java\\com\\example\\bot\\tgbot\\service\\java.jpg")));
+
+            try {
+                execute(sendPhoto);
+                log.info("neeeeeeeeed");
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
         } else {
             sendDefaultMessage(chatId, userName, receivedMessage);
             log.info(receivedMessage);
