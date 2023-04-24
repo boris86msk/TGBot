@@ -1,12 +1,18 @@
 package com.example.bot.tgbot;
 
+import com.example.bot.tgbot.components.Article;
 import com.example.bot.tgbot.components.Buttons;
+import com.example.bot.tgbot.components.ButtonsSecondLevel;
 import com.example.bot.tgbot.config.BotConfig;
 import com.example.bot.tgbot.dto.ResponseDto;
 import com.example.bot.tgbot.service.WeatherRestTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -25,12 +31,15 @@ import static com.example.bot.tgbot.components.BotCommands.*;
 
 @Slf4j
 @Service
-public class TestTelegramBot extends TelegramLongPollingBot {
+@EnableScheduling
+public class MyTelegramBot extends TelegramLongPollingBot {
+    //@Autowired
+    //private JdbcTemplate jdbcTemplate;
     @Autowired
     private WeatherRestTemplate weatherRestTemplate;
     private final BotConfig botConfig;
 
-    public TestTelegramBot(BotConfig config) {
+    public MyTelegramBot(BotConfig config) {
         this.botConfig = config;
         try {
             this.execute(new SetMyCommands(LIST_OF_COMMANDS, new BotCommandScopeDefault(), null));
@@ -52,7 +61,7 @@ public class TestTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(@NonNull Update update) {
         long chatId = 0;
-        long userId = 0; //это нам понадобится позже
+        long userId = 0;
         String userName = null;
         String receivedMessage;
 
@@ -84,23 +93,27 @@ public class TestTelegramBot extends TelegramLongPollingBot {
         String regex = "\"[а-яА-Я]+\"";
         if (Pattern.matches(regex, receivedMessage)) {
             sendWeatherInCity(receivedMessage, chatId);
-        } else if(receivedMessage.equals("/start")) {
+        } else if(receivedMessage.equals("/start") || receivedMessage.equals("/back")) {
             startBot(chatId, userName);
-        } else if(receivedMessage.equals("/help")) {
-            sendHelpText(chatId, HELP_TEXT);
-        } else if (receivedMessage.equals("/info")) {
-            sendInfoText(chatId, INFO_TEXT);
-        } else if (receivedMessage.equals("/java")) {
-            SendPhoto sendPhoto = new SendPhoto();
-            sendPhoto.setChatId(chatId);
-            sendPhoto.setPhoto(new InputFile(new File("C:\\projects\\tgBot\\src\\main\\java\\com\\example\\bot\\tgbot\\service\\java.jpg")));
+        } else if(receivedMessage.equals("/button_1")) {
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText(new  Article().article);
 
             try {
-                execute(sendPhoto);
-                log.info("neeeeeeeeed");
+                execute(message);
             } catch (TelegramApiException e) {
                 log.error(e.getMessage());
             }
+        } else if(receivedMessage.equals("/button_2")) {
+           // jdbcTemplate.update("INSERT INTO td_table(article) values('первая статья')");
+
+        } else if(receivedMessage.equals("/help")) {
+            sendHelpText(chatId, HELP_TEXT);
+        } else if (receivedMessage.equals("/info")) {
+            sendInfoText(chatId);
+        } else if (receivedMessage.equals("/java")) {
+            entryToJava(chatId);
         } else {
             sendDefaultMessage(chatId, userName, receivedMessage);
             log.info(receivedMessage);
@@ -108,12 +121,24 @@ public class TestTelegramBot extends TelegramLongPollingBot {
 
     }
 
+    private void  entryToJava(long chatId) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(chatId);
+        sendPhoto.setPhoto(new InputFile(new File("C:\\projects\\tgBot\\src\\main\\java\\com\\example\\bot\\tgbot\\service\\java.jpg")));
+
+        try {
+            execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+        }
+    }
+
     private void sendDefaultMessage(long chatId, String userName, String receivedMessage) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(userName + ", скорее всего вы ввели неверные данные" +
                 " или не в правильном формате, проверьте " + "<<" + receivedMessage +
-                        ">>" + " и повторите попытку");
+                        ">>" + " и повторите попытку но в любом случаи ваше сообщение будет сохранено и прочитано");
 
         try {
             execute(message);
@@ -149,14 +174,15 @@ public class TestTelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendInfoText(long chatId, String textToSend) {
+    private void sendInfoText(long chatId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText(textToSend);
+        message.setText("Вот и минюшка подошла");
+        message.setReplyMarkup(ButtonsSecondLevel.inlineMarkup());
 
         try {
             execute(message);
-            log.info("send info");
+            log.info("send menu second levels");
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
@@ -186,15 +212,17 @@ public class TestTelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    //Отправка сообщения по id "в лоб"
-    public void testmethod(String mess) {
+
+    @Scheduled(cron = "0 30 10 * * ?")  //fixedDelay = 100 000 = 1:40
+    public void sendMessage() {
         SendMessage message = new SendMessage();
-        message.setChatId("5184901392");  //Юля=5099445382   1468098809  Вера=5184901392
-        message.setText("Сообщение от Бориса : " + mess);
+        message.setChatId("948173068");  //Юля=5099445382   1468098809  Вера=5184901392  Александр=948173068
+        message.setText("это тестовое сообщение отправлено с помощью @Scheduled" +
+                " в 10:30 по МСК");
 
         try {
             execute(message);
-            log.info("message in lob");
+            log.info("message from Schedule");
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
