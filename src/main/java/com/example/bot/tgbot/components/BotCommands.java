@@ -6,16 +6,14 @@ import java.util.List;
 
 public interface BotCommands {
     List<BotCommand> LIST_OF_COMMANDS = List.of(
-            new BotCommand("/start", "start bot"),
-            new BotCommand("/help", "bot info")
+            new BotCommand("/start", "start bot")
     );
 
-    String HELP_TEXT = "Когда-нибудь я смогу тебе помочь, но пока что я сам ничего не умею\n" +
-            "Тебе доступны следующие команды:\n\n" +
-            "/start - start the bot\n" +
-            "/help - help menu";
+    String INFO_TEXT = "Бот создан пользователем https://t.me/Boris320\n\n" +
+            "boris86msk@yandex.ru\n\n" +
+            "приятного общения!";
 
-    String INFO_TEXT = "Введи название города в ковычках:\n\n" +
-            "\"Воронеж\"\n\n" +
+    String WEATHER_TEXT = "Введи название города в ковычках\n\n" +
+            "например: \"Воронеж\"\n\n" +
             "и я попробую разведать какая там обстановка";
 }

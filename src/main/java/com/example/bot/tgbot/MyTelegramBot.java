@@ -33,8 +33,8 @@ import static com.example.bot.tgbot.components.BotCommands.*;
 @Service
 @EnableScheduling
 public class MyTelegramBot extends TelegramLongPollingBot {
-    //@Autowired
-    //private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private WeatherRestTemplate weatherRestTemplate;
     private final BotConfig botConfig;
@@ -58,6 +58,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         return botConfig.getToken();
     }
 
+    /**
+     * Метод вызывается при регистрации действий в чате с ботом
+     * полученное сообщение текстом обрабатывает блок if (update.hasMessage())
+     * нажатие кнопок обрабатывает else if (update.hasCallbackQuery())
+     * в обоих случаях вызывается метод botAnswerUtils()
+     */
     @Override
     public void onUpdateReceived(@NonNull Update update) {
         long chatId = 0;
@@ -65,7 +71,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         String userName = null;
         String receivedMessage;
 
-        //если получено сообщение текстом
         if (update.hasMessage()) {
             chatId = update.getMessage().getChatId();
             userId = update.getMessage().getFrom().getId();
@@ -76,7 +81,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 botAnswerUtils(receivedMessage, chatId, userName);
             }
 
-            //если нажата одна из кнопок бота
         } else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId();
             userId = update.getCallbackQuery().getFrom().getId();
@@ -89,29 +93,23 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * Метод обработчик поступающих команд, поступающих через
+     * @param receivedMessage, команда может быть произвольным сообщением
+     * а при нажатии кнопки это будет ее маркер setCallbackData()
+     */
     private void botAnswerUtils(String receivedMessage, long chatId, String userName) {
-        String regex = "\"[а-яА-Я]+\"";
+        String regex = "\"[а-яА-Я]+-*[а-яА-Я]*\"";
         if (Pattern.matches(regex, receivedMessage)) {
             sendWeatherInCity(receivedMessage, chatId);
-        } else if(receivedMessage.equals("/start") || receivedMessage.equals("/back")) {
+        } else if(receivedMessage.equals("/start")) {
             startBot(chatId, userName);
-        } else if(receivedMessage.equals("/button_1")) {
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText(new  Article().article);
-
-            try {
-                execute(message);
-            } catch (TelegramApiException e) {
-                log.error(e.getMessage());
-            }
-        } else if(receivedMessage.equals("/button_2")) {
-           // jdbcTemplate.update("INSERT INTO td_table(article) values('первая статья')");
-
-        } else if(receivedMessage.equals("/help")) {
-            sendHelpText(chatId, HELP_TEXT);
-        } else if (receivedMessage.equals("/info")) {
-            sendInfoText(chatId);
+        } else if(receivedMessage.equals("/info")) {
+            sendInfoText(chatId, INFO_TEXT);
+        } else if(receivedMessage.equals("/weather")) {
+            sendInfoText(chatId, WEATHER_TEXT);
+        } else if (receivedMessage.equals("/id")) {
+            findOutId(chatId, userName);
         } else if (receivedMessage.equals("/java")) {
             entryToJava(chatId);
         } else {
@@ -121,13 +119,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     }
 
-    private void  entryToJava(long chatId) {
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(chatId);
-        sendPhoto.setPhoto(new InputFile(new File("C:\\projects\\tgBot\\src\\main\\java\\com\\example\\bot\\tgbot\\service\\java.jpg")));
-
+    private void runExecute(SendMessage message, String logInfo) {
         try {
-            execute(sendPhoto);
+            execute(message);
+            if (logInfo != null) {
+                log.info(logInfo);
+            }
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
@@ -136,56 +133,37 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private void sendDefaultMessage(long chatId, String userName, String receivedMessage) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText(userName + ", скорее всего вы ввели неверные данные" +
-                " или не в правильном формате, проверьте " + "<<" + receivedMessage +
-                        ">>" + " и повторите попытку но в любом случаи ваше сообщение будет сохранено и прочитано");
+        message.setReplyMarkup(Buttons.inlineMarkup());
+        message.setText(userName + ", скорее всего вы ввели неверные данные/команду" +
+                " или не в правильном формате, проверьте " + "<<" + receivedMessage + ">>");
 
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+        runExecute(message, null);
     }
 
     private void startBot(long chatId, String userName) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Привет, " + userName + "! это учебный бот для проекта WeatherAPI.");
+        message.setText("Привет, " + userName + "! тебе доступны следующие команды:");
         message.setReplyMarkup(Buttons.inlineMarkup());
 
-        try {
-            execute(message);
-            log.info("Start bot");
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+        runExecute(message, "Start bot");
     }
 
-    private void sendHelpText(long chatId, String textToSend) {
+    private void sendInfoText(long chatId, String info) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText(textToSend);
+        message.setText(info);
 
-        try {
-            execute(message);
-            log.info("need halp");
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+        runExecute(message, null);
     }
 
-    private void sendInfoText(long chatId) {
+    private void findOutId(long chatId, String userName) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Вот и минюшка подошла");
-        message.setReplyMarkup(ButtonsSecondLevel.inlineMarkup());
+        message.setText("Ваши персональные данные в telegram\n" +
+                "id: " + chatId + "\n" + "user name: " + userName);
 
-        try {
-            execute(message);
-            log.info("send menu second levels");
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+        runExecute(message, null);
     }
 
     private void sendWeatherInCity(String param, long chatId) {
@@ -204,25 +182,29 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(str);
-        try {
-            execute(message);
-            log.info("id:" + chatId + " asked for the weather in " + param);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+        message.setReplyMarkup(Buttons.inlineMarkup());
+        String logInfo = "id:" + chatId + " asked for the weather in " + param;
+
+        runExecute(message, logInfo);
     }
 
 
     @Scheduled(cron = "0 30 10 * * ?")  //fixedDelay = 100 000 = 1:40
     public void sendMessage() {
         SendMessage message = new SendMessage();
-        message.setChatId("948173068");  //Юля=5099445382   1468098809  Вера=5184901392  Александр=948173068
-        message.setText("это тестовое сообщение отправлено с помощью @Scheduled" +
-                " в 10:30 по МСК");
+        message.setChatId("1468098809");  //Юля=5099445382   1468098809  Вера=5184901392  Александр=948173068
+        message.setText("");
+
+        runExecute(message, "message from Schedule");
+    }
+
+    private void  entryToJava(long chatId) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(chatId);
+        sendPhoto.setPhoto(new InputFile(new File("C:\\projects\\tgBot\\src\\main\\java\\com\\example\\bot\\tgbot\\service\\java.jpg")));
 
         try {
-            execute(message);
-            log.info("message from Schedule");
+            execute(sendPhoto);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
