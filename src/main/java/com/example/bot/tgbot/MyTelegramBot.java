@@ -1,15 +1,13 @@
 package com.example.bot.tgbot;
 
-import com.example.bot.tgbot.components.Article;
 import com.example.bot.tgbot.components.Buttons;
-import com.example.bot.tgbot.components.ButtonsSecondLevel;
 import com.example.bot.tgbot.config.BotConfig;
 import com.example.bot.tgbot.dto.ResponseDto;
+//import com.example.bot.tgbot.entity.NewUserEntity;
+import com.example.bot.tgbot.repository.NewUserRepository;
 import com.example.bot.tgbot.service.WeatherRestTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.regex.Pattern;
 
 import static com.example.bot.tgbot.components.BotCommands.*;
@@ -33,8 +32,9 @@ import static com.example.bot.tgbot.components.BotCommands.*;
 @Service
 @EnableScheduling
 public class MyTelegramBot extends TelegramLongPollingBot {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    //@Autowired
+    //private NewUserRepository newUserRepository;
+
     @Autowired
     private WeatherRestTemplate weatherRestTemplate;
     private final BotConfig botConfig;
@@ -75,6 +75,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             chatId = update.getMessage().getChatId();
             userId = update.getMessage().getFrom().getId();
             userName = update.getMessage().getFrom().getFirstName();
+            findUser(userId, userName);
 
             if (update.getMessage().hasText()) {
                 receivedMessage = update.getMessage().getText();
@@ -85,6 +86,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             chatId = update.getCallbackQuery().getMessage().getChatId();
             userId = update.getCallbackQuery().getFrom().getId();
             userName = update.getCallbackQuery().getFrom().getFirstName();
+            findUser(userId, userName);
             receivedMessage = update.getCallbackQuery().getData();
             log.info("Пользователь " + userId + " " +
                     "nickname = " + update.getCallbackQuery().getFrom().getFirstName());
@@ -93,8 +95,18 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    private void findUser(long userId, String userName) {
+//        if (newUserRepository.findByTgId(String.valueOf(userId)) == null) {
+//            NewUserEntity newUserEntity = new NewUserEntity();
+//            newUserEntity.setTgId(String.valueOf(userId));
+//            newUserEntity.setUserName(userName);
+//            newUserEntity.setRegistrationDate(LocalDate.now().toString());
+//            newUserRepository.save(newUserEntity);
+//        }
+    }
+
     /**
-     * Метод обработчик поступающих команд, поступающих через
+     * Метод обработчик команд, поступающих через
      * @param receivedMessage, команда может быть произвольным сообщением
      * а при нажатии кнопки это будет ее маркер setCallbackData()
      */

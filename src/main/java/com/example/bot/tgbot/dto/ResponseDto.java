@@ -5,7 +5,7 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class ResponseDto {
+public class ResponseDto extends ErrorDto{
     private LocationDto location;
 
     private CurrentDto current;

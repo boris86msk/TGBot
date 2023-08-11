@@ -21,7 +21,7 @@ public class Buttons {
         JAVA_BUTTON.setCallbackData("/java");
 
         List<InlineKeyboardButton> rowInline = List.of(INFO_BUTTON, WEATHER_BUTTON);
-        List<InlineKeyboardButton> rowInline2 = List.of(ID_BUTTON, JAVA_BUTTON);
+        List<InlineKeyboardButton> rowInline2 = List.of(ID_BUTTON);
         List<List<InlineKeyboardButton>> rowsInLine = List.of(rowInline, rowInline2);
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
