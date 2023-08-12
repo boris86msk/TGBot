@@ -51,20 +51,4 @@ public class WeatherRestTemplate {
                 Double.parseDouble(responseDto.getCurrent().getWind_kph())/3.6d);
         return format;
     }
-
-    /**
-     * поле и метод для обращению к WeatherAPI на другом сервисе
-     */
-//    private static final String URL = "http://localhost:8081/test?param=%s";
-//
-//    public ResponseDto getWeatherInfo(String param) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseDto resBody = restTemplate.exchange(
-//                String.format(URL, param),
-//                HttpMethod.GET,
-//                new HttpEntity<>(null),
-//                ResponseDto.class
-//        ).getBody();
-//        return resBody;
-//    }
 }

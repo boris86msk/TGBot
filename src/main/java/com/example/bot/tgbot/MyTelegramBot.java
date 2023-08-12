@@ -75,7 +75,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             chatId = update.getMessage().getChatId();
             userId = update.getMessage().getFrom().getId();
             userName = update.getMessage().getFrom().getFirstName();
-            findUser(userId, userName);
+            //findUser(userId, userName);
 
             if (update.getMessage().hasText()) {
                 receivedMessage = update.getMessage().getText();
@@ -86,7 +86,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             chatId = update.getCallbackQuery().getMessage().getChatId();
             userId = update.getCallbackQuery().getFrom().getId();
             userName = update.getCallbackQuery().getFrom().getFirstName();
-            findUser(userId, userName);
+            //findUser(userId, userName);
             receivedMessage = update.getCallbackQuery().getData();
             log.info("Пользователь " + userId + " " +
                     "nickname = " + update.getCallbackQuery().getFrom().getFirstName());
@@ -95,7 +95,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void findUser(long userId, String userName) {
+    /**
+     *  Добавление нового юзера в БД
+     *  ПОМЕТКА: в разработке
+    //   private void findUser(long userId, String userName) {
 //        if (newUserRepository.findByTgId(String.valueOf(userId)) == null) {
 //            NewUserEntity newUserEntity = new NewUserEntity();
 //            newUserEntity.setTgId(String.valueOf(userId));
@@ -103,7 +106,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 //            newUserEntity.setRegistrationDate(LocalDate.now().toString());
 //            newUserRepository.save(newUserEntity);
 //        }
-    }
+  //  }
+     */
 
     /**
      * Метод обработчик команд, поступающих через
@@ -200,7 +204,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         runExecute(message, logInfo);
     }
 
-
+    /**
+     *  Возможность отправлять сообщения по расписанию через шедулер
+     *  ПОМЕТКА: в разработке
+     */
     @Scheduled(cron = "0 30 10 * * ?")  //fixedDelay = 100 000 = 1:40
     public void sendMessage() {
         SendMessage message = new SendMessage();
@@ -210,6 +217,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         runExecute(message, "message from Schedule");
     }
 
+
+    /**
+     * метод примера добавления мультимедиа в сообщения
+     * ПОМЕТКА: в разработке
+     */
     private void  entryToJava(long chatId) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);

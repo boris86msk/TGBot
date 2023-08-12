@@ -6,8 +6,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.List;
 
+/**
+ * каркас класса для многокнопочного меню
+ * ПОМЕТКА: в разработке
+ */
 public class ButtonsSecondLevel {
-    private static final InlineKeyboardButton BUTTON_1 = new InlineKeyboardButton("Что такое пул строк?");
+    private static final InlineKeyboardButton BUTTON_1 = new InlineKeyboardButton("Кнопа 1");
     private static final InlineKeyboardButton BUTTON_2 = new InlineKeyboardButton("Кнопа 2");
     private static final InlineKeyboardButton BUTTON_3 = new InlineKeyboardButton("Кнопа 3");
     private static final InlineKeyboardButton BUTTON_4 = new InlineKeyboardButton("Кнопа 4");
