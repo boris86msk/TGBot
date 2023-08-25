@@ -1,4 +1,4 @@
-CREATE TABLE public.new_user
+CREATE TABLE public.users
 (
     id serial primary key,
     tg_id integer,

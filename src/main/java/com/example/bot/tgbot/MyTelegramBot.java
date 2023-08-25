@@ -3,7 +3,7 @@ package com.example.bot.tgbot;
 import com.example.bot.tgbot.components.Buttons;
 import com.example.bot.tgbot.config.BotConfig;
 import com.example.bot.tgbot.dto.ResponseDto;
-//import com.example.bot.tgbot.entity.NewUserEntity;
+import com.example.bot.tgbot.entity.NewUserEntity;
 import com.example.bot.tgbot.repository.NewUserRepository;
 import com.example.bot.tgbot.service.WeatherRestTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,8 @@ import static com.example.bot.tgbot.components.BotCommands.*;
 @Service
 @EnableScheduling
 public class MyTelegramBot extends TelegramLongPollingBot {
-    //@Autowired
-    //private NewUserRepository newUserRepository;
+    @Autowired
+    private NewUserRepository newUserRepository;
 
     @Autowired
     private WeatherRestTemplate weatherRestTemplate;
@@ -86,7 +86,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             chatId = update.getCallbackQuery().getMessage().getChatId();
             userId = update.getCallbackQuery().getFrom().getId();
             userName = update.getCallbackQuery().getFrom().getFirstName();
-            //findUser(userId, userName);
+            findUser(userId, userName);
             receivedMessage = update.getCallbackQuery().getData();
             log.info("Пользователь " + userId + " " +
                     "nickname = " + update.getCallbackQuery().getFrom().getFirstName());
@@ -95,19 +95,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    /**
-     *  Добавление нового юзера в БД
-     *  ПОМЕТКА: в разработке
-    //   private void findUser(long userId, String userName) {
-//        if (newUserRepository.findByTgId(String.valueOf(userId)) == null) {
-//            NewUserEntity newUserEntity = new NewUserEntity();
-//            newUserEntity.setTgId(String.valueOf(userId));
-//            newUserEntity.setUserName(userName);
-//            newUserEntity.setRegistrationDate(LocalDate.now().toString());
-//            newUserRepository.save(newUserEntity);
-//        }
-  //  }
-     */
+       private void findUser(long userId, String userName) {
+        if (newUserRepository.findByTgId(String.valueOf(userId)) == null) {
+            NewUserEntity newUserEntity = new NewUserEntity();
+            newUserEntity.setTgId(String.valueOf(userId));
+            newUserEntity.setUserName(userName);
+            newUserEntity.setRegistrationDate(LocalDate.now().toString());
+            newUserRepository.save(newUserEntity);
+        }
+    }
+
 
     /**
      * Метод обработчик команд, поступающих через
