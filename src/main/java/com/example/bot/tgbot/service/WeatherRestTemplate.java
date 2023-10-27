@@ -9,10 +9,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class WeatherRestTemplate {
-
     @Value("${API_Key}")
     private String api_key;
-
     private String method_api = "current.json";
     private static final String ROOT_URL = "http://api.weatherapi.com/v1/";
     private static final String PARAM = "%s%s?key=%s&q=%s&aqi=no";
